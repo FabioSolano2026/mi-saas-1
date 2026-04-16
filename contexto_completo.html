@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contexto Completo — SaaS Multi-Nicho</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #6366f1;
+    --accent2: #8b5cf6;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --cyan: #06b6d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 14px;
+  }
+  a { color: var(--accent); text-decoration: none; }
+
+  /* ── LAYOUT ── */
+  .page { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+  .sidebar-logo {
+    padding: 0 16px 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .sidebar-logo .title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .sidebar-logo .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .nav-section { padding: 6px 16px; font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--muted); letter-spacing: 0.08em; margin-top: 8px; }
+  .nav-link {
+    display: block;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--muted);
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-link:hover { color: var(--text); background: var(--surface2); border-left-color: var(--accent); }
+
+  .main { flex: 1; overflow: hidden; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #1e1b4b 0%, #1a1d27 50%, #0f172a 100%);
+    padding: 48px 48px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.4);
+    color: #a5b4fc;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 800; line-height: 1.2; }
+  .hero h1 span { color: #818cf8; }
+  .hero-sub { font-size: 15px; color: var(--muted); margin-top: 10px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero-stat { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; }
+  .hero-stat .num { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .hero-stat .lbl { font-size: 11px; color: var(--muted); }
+
+  /* ── CONTENT ── */
+  .content { padding: 40px 48px; max-width: 1100px; }
+  section { margin-bottom: 48px; }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .icon { font-size: 18px; }
+  h3 { font-size: 15px; font-weight: 600; color: var(--text); margin: 20px 0 10px; }
+  p { color: var(--muted); margin-bottom: 10px; font-size: 13px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-green { background: rgba(16,185,129,0.15); color: #34d399; }
+  .badge-amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .badge-red   { background: rgba(239,68,68,0.15);  color: #f87171; }
+  .badge-blue  { background: rgba(59,130,246,0.15); color: #93c5fd; }
+  .badge-purple{ background: rgba(139,92,246,0.15); color: #c4b5fd; }
+  .badge-gray  { background: rgba(148,163,184,0.1); color: #94a3b8; }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--surface2);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td {
+    padding: 9px 14px;
+    font-size: 12px;
+    color: var(--text);
+    border-bottom: 1px solid rgba(46,51,80,0.5);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  td code, th code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px;
+    background: rgba(99,102,241,0.12);
+    color: #a5b4fc;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── CODE BLOCKS ── */
+  pre {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    color: #c9d1d9;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .cm { color: #8b949e; font-style: italic; }
+  .ty { color: #79c0ff; }
+  .num { color: #f2cc60; }
+
+  /* ── CARDS ── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .card-desc { font-size: 12px; color: var(--muted); }
+
+  /* ── SPRINT STATUS ── */
+  .sprint-list { display: flex; flex-direction: column; gap: 12px; }
+  .sprint {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .sprint-icon { font-size: 20px; line-height: 1; margin-top: 2px; }
+  .sprint-body { flex: 1; }
+  .sprint-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .sprint-desc { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .sprint-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+  }
+  .flow-step:not(:last-child) {
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 0;
+  }
+  .flow-num {
+    width: 26px; height: 26px; min-width: 26px;
+    background: rgba(99,102,241,0.2);
+    border: 1px solid rgba(99,102,241,0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a5b4fc;
+    margin-top: 1px;
+  }
+  .flow-content .flow-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .flow-content .flow-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ── FILE TREE ── */
+  .file-tree {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 2;
+  }
+  .file-tree .dir { color: #79c0ff; }
+  .file-tree .file { color: #c9d1d9; }
+  .file-tree .ts { color: #a5d6ff; }
+  .file-tree .sql { color: #f2cc60; }
+  .file-tree .new { color: #3fb950; }
+  .file-tree .cm { color: #8b949e; }
+  .indent1 { padding-left: 20px; }
+  .indent2 { padding-left: 40px; }
+  .indent3 { padding-left: 60px; }
+  .indent4 { padding-left: 80px; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+  }
+  .callout-icon { font-size: 16px; line-height: 1.4; }
+  .callout-body { flex: 1; }
+  .callout-title { font-weight: 600; margin-bottom: 4px; }
+  .callout-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); }
+  .callout-green .callout-title { color: #34d399; }
+  .callout-amber { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); }
+  .callout-amber .callout-title { color: #fbbf24; }
+  .callout-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); }
+  .callout-red .callout-title { color: #f87171; }
+  .callout-blue { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25); }
+  .callout-blue .callout-title { color: #93c5fd; }
+  .callout p { color: var(--muted); margin: 0; font-size: 12px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 8px 0 20px; }
+
+  /* ── PRINT ── */
+  @media print {
+    .sidebar { display: none; }
+    .hero { padding: 24px; }
+    .content { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="title">SaaS Multi-Nicho</div>
+    <div class="sub">Sprint 3 completado · 2026-04-04</div>
+  </div>
+
+  <div class="nav-section">Proyecto</div>
+  <a class="nav-link" href="#overview">Resumen ejecutivo</a>
+  <a class="nav-link" href="#stack">Stack técnico</a>
+  <a class="nav-link" href="#estructura">Estructura de archivos</a>
+
+  <div class="nav-section">Base de datos</div>
+  <a class="nav-link" href="#tablas">21 Tablas</a>
+  <a class="nav-link" href="#funciones">Funciones PG</a>
+  <a class="nav-link" href="#rls">RLS & Seguridad</a>
+  <a class="nav-link" href="#seed">Seed data</a>
+
+  <div class="nav-section">Sprints</div>
+  <a class="nav-link" href="#sprint1">Sprint 1 — DB ✅</a>
+  <a class="nav-link" href="#sprint2">Sprint 2 — Auth/API ✅</a>
+  <a class="nav-link" href="#sprint3">Sprint 3 — Kanban ✅</a>
+  <a class="nav-link" href="#sprint4">Sprint 4-7 — Pendiente</a>
+
+  <div class="nav-section">Referencia</div>
+  <a class="nav-link" href="#api-routes">API Routes</a>
+  <a class="nav-link" href="#kanban-cols">Columnas Kanban</a>
+  <a class="nav-link" href="#decisiones">Decisiones ADR</a>
+  <a class="nav-link" href="#errores">Errores resueltos</a>
+  <a class="nav-link" href="#credenciales">Credenciales</a>
+</nav>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<div class="main">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Documento de contexto — Generado 2026-04-04</div>
+  <h1>SaaS <span>Multi-Nicho</span></h1>
+  <div class="hero-sub">Sistema multi-tenant con CRM universal, agente conversacional con IA, Kanban inmutable y módulos especializados por industria. Primer nicho: MLM Bienestar.</div>
+  <div class="hero-meta">
+    <div class="hero-stat"><div class="num">21</div><div class="lbl">Tablas BD</div></div>
+    <div class="hero-stat"><div class="num">11</div><div class="lbl">API Routes</div></div>
+    <div class="hero-stat"><div class="num">3/7</div><div class="lbl">Sprints completados</div></div>
+    <div class="hero-stat"><div class="num">100%</div><div class="lbl">RLS habilitado</div></div>
+    <div class="hero-stat"><div class="num">11/11</div><div class="lbl">Checks auditoría</div></div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- ═══ RESUMEN ═══ -->
+<section id="overview">
+  <div class="section-title"><span class="icon">🏗️</span> Resumen Ejecutivo</div>
+  <p>Sistema <strong style="color:var(--text)">multi-tenant, multi-nicho</strong> con un núcleo CRM universal al que se conectan módulos especializados por industria. El agente conversacional califica prospectos, recomienda productos con lenguaje legal exacto, agenda citas si el nicho lo requiere, y deposita la tarjeta en el Kanban del socio.</p>
+  <p><strong style="color:var(--text)">Primer nicho validado:</strong> MLM Bienestar — validación de ingredientes, cumplimiento regulatorio por país, y ciclos de recompra de 6 meses.</p>
+
+  <div class="callout callout-blue" style="margin-top:16px">
+    <div class="callout-icon">🔑</div>
+    <div class="callout-body">
+      <div class="callout-title">Regla de oro: Frontend NUNCA llama a Supabase directamente</div>
+      <p>Todo flujo pasa por API Routes. El servidor verifica <code>auth.getUser()</code> y aplica RLS. El frontend no envía <code>tenant_id</code> ni <code>socio_id</code> — el servidor los toma del JWT.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STACK ═══ -->
+<section id="stack">
+  <div class="section-title"><span class="icon">⚙️</span> Stack Técnico</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Capa</th><th>Tecnología</th><th>Notas críticas</th></tr></thead>
+      <tbody>
+        <tr><td>Framework</td><td><code>Next.js 16 + React 19 + TypeScript</code></td><td>App Router, Server Components</td></tr>
+        <tr><td>Estilos</td><td><code>Tailwind CSS 3.4</code></td><td>shadcn/ui instalado</td></tr>
+        <tr><td>Base de datos</td><td><code>Supabase (Auth + PostgreSQL + RLS)</code></td><td>Project ref: <code>rgcntceelzttponmehte</code></td></tr>
+        <tr><td>AI Engine</td><td><code>Vercel AI SDK v6 + OpenAI</code></td><td><strong>v6</strong>: usar <code>maxOutputTokens</code> y <code>toTextStreamResponse()</code></td></tr>
+        <tr><td>Validación</td><td><code>Zod</code></td><td>En todas las API Routes</td></tr>
+        <tr><td>Estado</td><td><code>Zustand</code></td><td>Pendiente de uso real</td></tr>
+        <tr><td>UI Components</td><td><code>shadcn/ui</code></td><td>badge, button, card, dialog, select, textarea</td></tr>
+        <tr><td>Test runner</td><td><code>tsx</code> (dev dep)</td><td><code>npx tsx tests/archivo.test.ts</code></td></tr>
+        <tr><td>Íconos</td><td><code>lucide-react</code></td><td></td></tr>
+        <tr><td>Clases</td><td><code>clsx + tailwind-merge</code></td><td><code>cn()</code> en <code>src/lib/utils.ts</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-amber">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <div class="callout-title">Vercel AI SDK v6 — Nombres que cambiaron</div>
+      <p>No usar <code>maxTokens</code> (v5) → usar <code>maxOutputTokens</code>. No usar <code>toDataStreamResponse()</code> → usar <code>toTextStreamResponse()</code>. El CLAUDE.md dice v5 pero el proyecto usa v6.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ESTRUCTURA ═══ -->
+<section id="estructura">
+  <div class="section-title"><span class="icon">📁</span> Estructura de Archivos</div>
+  <div class="file-tree">
+    <div><span class="dir">mi-nuevo-saas/</span></div>
+    <div class="indent1"><span class="dir">src/</span></div>
+    <div class="indent2"><span class="dir">app/</span></div>
+    <div class="indent3"><span class="dir">(auth)/</span></div>
+    <div class="indent4"><span class="ts">login/page.tsx</span>  <span class="cm"># Página de login</span></div>
+    <div class="indent4"><span class="ts">signup/page.tsx</span>  <span class="cm"># Página de registro</span></div>
+    <div class="indent3"><span class="dir">(main)/</span></div>
+    <div class="indent4"><span class="ts new">dashboard/page.tsx</span>  <span class="cm"># Renderiza &lt;KanbanBoard&gt; ✅ Sprint 3</span></div>
+    <div class="indent3"><span class="dir">api/</span></div>
+    <div class="indent4"><span class="ts new">kanban/prospectos/route.ts</span>  <span class="cm"># GET prospectos agrupados</span></div>
+    <div class="indent4"><span class="ts new">kanban/mover/route.ts</span>  <span class="cm"># POST mover_kanban() RPC</span></div>
+    <div class="indent4"><span class="ts new">campanas/route.ts</span>  <span class="cm"># GET + POST campañas</span></div>
+    <div class="indent4"><span class="ts new">notificaciones/route.ts</span>  <span class="cm"># GET + PATCH notificaciones</span></div>
+    <div class="indent4"><span class="ts new">disponibilidad/route.ts</span>  <span class="cm"># GET slots por fecha</span></div>
+    <div class="indent4"><span class="ts new">agente/route.ts</span>  <span class="cm"># POST público, streaming AI</span></div>
+    <div class="indent2"><span class="dir">features/</span></div>
+    <div class="indent3"><span class="dir new">kanban/</span>  <span class="cm"># ✅ Sprint 3</span></div>
+    <div class="indent4"><span class="ts new">types/kanban.types.ts</span></div>
+    <div class="indent4"><span class="ts new">services/kanban.service.ts</span></div>
+    <div class="indent4"><span class="ts new">hooks/useKanban.ts</span></div>
+    <div class="indent4"><span class="ts new">hooks/useMoverProspecto.ts</span></div>
+    <div class="indent4"><span class="ts new">components/KanbanBoard.tsx</span></div>
+    <div class="indent4"><span class="ts new">components/KanbanColumn.tsx</span></div>
+    <div class="indent4"><span class="ts new">components/ProspectoCard.tsx</span></div>
+    <div class="indent4"><span class="ts new">components/MoverModal.tsx</span></div>
+    <div class="indent2"><span class="dir">components/ui/</span>  <span class="cm"># shadcn/ui</span></div>
+    <div class="indent3"><span class="ts new">badge.tsx · button.tsx · card.tsx · dialog.tsx · select.tsx · textarea.tsx</span></div>
+    <div class="indent2"><span class="dir">lib/</span></div>
+    <div class="indent3"><span class="ts new">supabase/types.ts</span>  <span class="cm"># 1456 líneas — generado con supabase gen types</span></div>
+    <div class="indent3"><span class="ts new">supabase/client.ts</span>  <span class="cm"># Browser client tipado</span></div>
+    <div class="indent3"><span class="ts new">supabase/server.ts</span>  <span class="cm"># Server client — cast as unknown workaround</span></div>
+    <div class="indent3"><span class="ts new">supabase/middleware.ts</span>  <span class="cm"># Refresh sesión SSR</span></div>
+    <div class="indent3"><span class="ts new">utils.ts</span>  <span class="cm"># cn() para shadcn/ui</span></div>
+    <div class="indent2"><span class="ts new">middleware.ts</span>  <span class="cm"># Protege /dashboard/* → /login</span></div>
+    <div class="indent1"><span class="dir">tests/</span></div>
+    <div class="indent2"><span class="ts new">audit-kanban.test.ts</span>  <span class="cm"># 11/11 checks pasados ✅</span></div>
+    <div class="indent1"><span class="ts">ARQUITECTURA_MAESTRA.md</span></div>
+    <div class="indent1"><span class="ts">SPRINT3_AUDITORIA.md</span></div>
+    <div class="indent1"><span class="ts">.env.local</span>  <span class="cm"># SUPABASE_URL, ANON_KEY, SERVICE_ROLE_KEY</span></div>
+  </div>
+</section>
+
+<!-- ═══ TABLAS ═══ -->
+<section id="tablas">
+  <div class="section-title"><span class="icon">🗄️</span> 21 Tablas de Base de Datos</div>
+
+  <h3>Core — Tenants & Usuarios</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tabla</th><th>PK</th><th>Columnas clave</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>tenants</code></td>
+          <td><code>tenant_id</code></td>
+          <td><code>nombre, plan, activo</code></td>
+          <td>Creado automáticamente al registrar usuario</td>
+        </tr>
+        <tr>
+          <td><code>paises</code></td>
+          <td><code>pais_id</code></td>
+          <td><code>codigo UK, nombre, moneda</code></td>
+          <td>6 países en seed. <code>codigo</code> es unique.</td>
+        </tr>
+        <tr>
+          <td><code>socios</code></td>
+          <td><code>usuario_id</code> (FK auth.users)</td>
+          <td><code>tenant_id, pais_registro, nombre_completo, email, rol, foto_url</code></td>
+          <td>Creado por trigger <code>handle_new_user</code></td>
+        </tr>
+        <tr>
+          <td><code>socio_assets</code></td>
+          <td><code>asset_id</code></td>
+          <td><code>tenant_id, socio_id, tipo, url, orden</code></td>
+          <td>Para landing pages multi-foto</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Conocimiento & Campañas</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tabla</th><th>Columnas clave</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>knowledge_bases</code></td>
+          <td><code>tenant_id, nombre, tipo, contenido, lenguaje_prohibido (jsonb), lenguaje_reemplazos (jsonb)</code></td>
+          <td>3 KBs en seed: próstata, colesterol, glucosa</td>
+        </tr>
+        <tr>
+          <td><code>condiciones_salud</code></td>
+          <td><code>tenant_id, knowledge_base_id FK, nombre</code></td>
+          <td><code>nombre</code> es VARCHAR libre — admin agrega sin deploy</td>
+        </tr>
+        <tr>
+          <td><code>campanas</code></td>
+          <td><code>tenant_id, socio_id FK, pais_id FK, condicion_salud_id FK, knowledge_base_id FK, nombre, agente_tipo, requiere_cita, modulo_destino</code></td>
+          <td><code>pais_id</code> vive aquí (no en socios). <code>modulo_destino</code> es VARCHAR libre.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Productos & Ingredientes</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tabla</th><th>Columnas clave</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>ingredientes</code></td>
+          <td><code>tenant_id, nombre, nivel_evidencia</code></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><code>productos</code></td>
+          <td><code>tenant_id, nombre, activo</code></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><code>producto_ingredientes</code></td>
+          <td><code>producto_id FK, ingrediente_id FK</code></td>
+          <td>Tabla puente M:N</td>
+        </tr>
+        <tr>
+          <td><code>productos_por_pais</code></td>
+          <td><code>producto_id FK, pais_id FK, precio, registro_sanitario, ente_regulador</code></td>
+          <td>Sin <code>registro_sanitario</code> el agente no puede mencionar el producto</td>
+        </tr>
+        <tr>
+          <td><code>condicion_productos_por_pais</code></td>
+          <td><code>condicion_id FK, producto_id FK, pais_id FK, prioridad, lenguaje_agente, razon_recomendacion</code></td>
+          <td>PK real: <code>condicion_id</code> (NO <code>condicion_salud_id</code>). <code>lenguaje_agente</code> es el texto legal que el agente cita textualmente.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>CRM — Prospectos & Kanban</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tabla</th><th>Columnas clave</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>prospectos</code></td>
+          <td><code>tenant_id, socio_id FK, campana_id FK, nombre, columna_kanban, temperatura, dias_sin_contacto, actualizado_en</code></td>
+          <td>CHECK constraint: <code>prospectos_columna_kanban_check</code> — 9 valores válidos exactos</td>
+        </tr>
+        <tr>
+          <td><code>movimientos_kanban</code></td>
+          <td><code>prospecto_id FK, socio_id FK, columna_origen, columna_destino, nota, creado_en</code></td>
+          <td><strong>INSERT-ONLY</strong>. RLS bloquea UPDATE y DELETE. Audit trail legal.</td>
+        </tr>
+        <tr>
+          <td><code>notificaciones</code></td>
+          <td><code>tenant_id, socio_id FK, prospecto_id FK, tipo, enviada, enviada_en</code></td>
+          <td>PK real: <code>notif_id</code> (NO <code>notificacion_id</code>). Campo: <code>enviada</code> (NO <code>leida</code>).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Comercial & Retención</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tabla</th><th>Columnas clave</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td><code>pedidos</code></td><td><code>tenant_id, prospecto_id FK, producto_id FK, monto</code></td><td></td></tr>
+        <tr><td><code>ciclos_consumo</code></td><td><code>tenant_id, prospecto_id FK, pedido_inicial_id FK, mes_actual, fecha_proximo_contacto</code></td><td>Ciclos de 6 meses MLM bienestar</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Agendamiento</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tabla</th><th>Columnas clave</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td><code>servicios</code></td><td><code>tenant_id, nombre, duracion_minutos</code></td><td></td></tr>
+        <tr><td><code>recursos</code></td><td><code>tenant_id, nombre, tipo</code></td><td></td></tr>
+        <tr><td><code>disponibilidad</code></td><td><code>tenant_id, servicio_id FK, recurso_id FK, fecha_hora_inicio, estado</code></td><td><code>estado</code>: disponible / reservado</td></tr>
+        <tr><td><code>citas</code></td><td><code>tenant_id, prospecto_id FK, servicio_id FK, recurso_id FK, disponibilidad_id FK, estado</code></td><td>Creada por <code>agendar_cita()</code> con NOWAIT</td></tr>
+        <tr><td><code>modulos_crm</code></td><td><code>tenant_id, nombre, tipo</code></td><td>Extensible a cualquier nicho</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ FUNCIONES PG ═══ -->
+<section id="funciones">
+  <div class="section-title"><span class="icon">⚡</span> Funciones PostgreSQL</div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">set_actualizado_en()</div>
+      <div class="card-desc">Trigger compartido. Actualiza <code>actualizado_en = now()</code> en cualquier tabla que lo tenga. Verificado en test 4 de auditoría.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">mover_kanban(p_prospecto_id, p_socio_id, p_destino, p_nota)</div>
+      <div class="card-desc">Transacción atómica: 1) UPDATE prospectos.columna_kanban 2) INSERT movimientos_kanban. Esquema: <code>public</code>. Llamada vía <code>supabase.rpc('mover_kanban', ...)</code>.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">agendar_cita(...)</div>
+      <div class="card-desc">Reserva slot con <code>FOR UPDATE NOWAIT</code>. Doble-booking imposible bajo concurrencia. Falla inmediatamente si el slot está siendo bloqueado por otro proceso.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">custom_access_token_hook(event)</div>
+      <div class="card-desc">Inyecta <code>tenant_id</code> en el JWT al hacer login. Vive en schema <code>public</code>. Debe estar activado en Dashboard → Auth → Hooks → Customize Access Token.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">handle_new_user()</div>
+      <div class="card-desc">Trigger en <code>auth.users</code>. Al registrar: crea tenant + socio automáticamente. No necesita intervención manual.</div>
+    </div>
+  </div>
+
+  <div class="callout callout-red">
+    <div class="callout-icon">🚨</div>
+    <div class="callout-body">
+      <div class="callout-title">Auth Hook — Configuración manual requerida</div>
+      <p>El hook <code>custom_access_token_hook</code> debe estar activado en Supabase Dashboard → Authentication → Hooks → "Customize Access Token (JWT) Claims". Sin él, todas las políticas RLS fallan (tenant_id no llega al JWT).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ RLS ═══ -->
+<section id="rls">
+  <div class="section-title"><span class="icon">🔒</span> RLS & Seguridad</div>
+
+  <h3>Patrón universal de aislamiento multi-tenant</h3>
+  <pre><span class="cm">-- SELECT: cada socio ve solo su tenant</span>
+<span class="kw">USING</span> (tenant_id = (auth.jwt() ->> <span class="str">'tenant_id'</span>)::<span class="ty">uuid</span>)
+
+<span class="cm">-- INSERT: el socio solo crea en su tenant y como su propio usuario</span>
+<span class="kw">WITH CHECK</span> (
+  tenant_id = (auth.jwt() ->> <span class="str">'tenant_id'</span>)::<span class="ty">uuid</span>
+  <span class="kw">AND</span> socio_id = auth.uid()
+)</pre>
+
+  <h3>Kanban inmutable — movimientos_kanban</h3>
+  <pre><span class="cm">-- Solo INSERT está permitido</span>
+<span class="kw">CREATE POLICY</span> movimientos_insert <span class="kw">ON</span> movimientos_kanban
+  <span class="kw">FOR INSERT WITH CHECK</span> (socio_id = auth.uid());
+<span class="cm">-- Sin política UPDATE → bloqueado automáticamente</span>
+<span class="cm">-- Sin política DELETE → bloqueado automáticamente</span></pre>
+
+  <h3>Tabla de garantías de seguridad</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Regla</th><th>Implementación</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr><td>No borrado físico de prospectos</td><td>No existe botón Delete en UI. <code>movimientos_kanban</code> es INSERT-only</td><td><span class="badge badge-green">✅ test 6</span></td></tr>
+        <tr><td>Aislamiento por <code>tenant_id</code></td><td>API Route verifica sesión. RLS filtra por JWT claim.</td><td><span class="badge badge-green">✅ test 1</span></td></tr>
+        <tr><td><code>temperatura</code> es read-only en UI</td><td>Badge sin input ni onClick. Solo el agente escribe este campo.</td><td><span class="badge badge-green">✅ revisión</span></td></tr>
+        <tr><td><code>socio_id</code> no lo envía el frontend</td><td>El servidor lo toma de <code>auth.getUser().id</code>. No suplantable.</td><td><span class="badge badge-green">✅ revisión</span></td></tr>
+        <tr><td>401 redirige a <code>/login</code></td><td><code>KanbanBoard</code> detecta "sesión" en el error y muestra botón redirect.</td><td><span class="badge badge-green">✅ revisión</span></td></tr>
+        <tr><td>Anti double-booking</td><td><code>agendar_cita()</code> usa <code>FOR UPDATE NOWAIT</code></td><td><span class="badge badge-green">✅ lógica PG</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ SEED ═══ -->
+<section id="seed">
+  <div class="section-title"><span class="icon">🌱</span> Seed Data</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Dato</th><th>Valor</th></tr></thead>
+      <tbody>
+        <tr><td>Tenant demo ID</td><td><code>00000000-0000-0000-0000-000000000001</code></td></tr>
+        <tr><td>Prospecto de prueba</td><td><code>60000000-0000-0000-0000-000000000001</code> (Carlos Vargas)</td></tr>
+        <tr><td>Países</td><td>Costa Rica, México, Colombia, Panamá, Guatemala, Estados Unidos</td></tr>
+        <tr><td>Knowledge Bases</td><td>3 KBs: próstata, colesterol, glucosa (dominio MLM bienestar)</td></tr>
+        <tr><td>Prospectos Kanban</td><td>3 prospectos de prueba con diferentes columnas</td></tr>
+        <tr><td>Matriz recomendación</td><td>Completa: condición × producto × país</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ SPRINT 1 ═══ -->
+<section id="sprint1">
+  <div class="section-title"><span class="icon">✅</span> Sprint 1 — Base de Datos</div>
+  <p><strong style="color:var(--green)">21 tablas · RLS 100% · 8 triggers · 3 funciones · 15 índices parciales</strong></p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Prompt</th><th>Tablas creadas</th></tr></thead>
+      <tbody>
+        <tr><td>1.1</td><td><code>tenants</code>, <code>paises</code>, <code>socios</code></td></tr>
+        <tr><td>1.2</td><td><code>knowledge_bases</code>, <code>condiciones_salud</code></td></tr>
+        <tr><td>1.3</td><td><code>campanas</code> + función <code>mover_kanban()</code> atómica</td></tr>
+        <tr><td>1.4</td><td><code>ingredientes</code>, <code>productos</code>, <code>producto_ingredientes</code>, <code>productos_por_pais</code>, <code>condicion_productos_por_pais</code></td></tr>
+        <tr><td>1.5</td><td><code>prospectos</code>, <code>movimientos_kanban</code></td></tr>
+        <tr><td>1.6</td><td><code>notificaciones</code>, <code>pedidos</code>, <code>ciclos_consumo</code></td></tr>
+        <tr><td>1.7</td><td><code>servicios</code>, <code>recursos</code>, <code>disponibilidad</code>, <code>citas</code>, <code>modulos_crm</code> + <code>agendar_cita()</code></td></tr>
+        <tr><td>Extra</td><td><code>socio_assets</code> (landing pages multi-foto)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ SPRINT 2 ═══ -->
+<section id="sprint2">
+  <div class="section-title"><span class="icon">✅</span> Sprint 2 — Auth + TypeScript + API Routes</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Archivo</th><th>Descripción</th></tr></thead>
+      <tbody>
+        <tr><td><code>src/lib/supabase/types.ts</code></td><td>1456 líneas · 21 tablas tipadas · generado con <code>supabase gen types typescript --project-id rgcntceelzttponmehte</code></td></tr>
+        <tr><td><code>src/lib/supabase/server.ts</code></td><td>Server client — usa <code>CookieMethodsServer</code> + cast <code>as unknown as SupabaseClient&lt;Database&gt;</code> para workaround tipo <code>never</code></td></tr>
+        <tr><td><code>src/middleware.ts</code></td><td>Protege <code>/dashboard/*</code> → redirige a <code>/login</code>. Redirige a <code>/dashboard</code> si ya logueado.</td></tr>
+        <tr><td><code>src/app/api/kanban/prospectos/route.ts</code></td><td>GET: prospectos agrupados por <code>columna_kanban</code>. Usa <code>select('*')</code> para evitar problemas de inferencia de tipos.</td></tr>
+        <tr><td><code>src/app/api/kanban/mover/route.ts</code></td><td>POST: Zod valida <code>{prospecto_id, destino, nota?}</code> → llama <code>mover_kanban()</code>. <code>p_nota: nota ?? undefined</code> (no null).</td></tr>
+        <tr><td><code>src/app/api/campanas/route.ts</code></td><td>Usa <code>type CampanaInsert = Database['public']['Tables']['campanas']['Insert']</code> para evitar tipo <code>never</code> en insert.</td></tr>
+        <tr><td><code>src/app/api/notificaciones/route.ts</code></td><td>Columnas reales: <code>notif_id</code> (no <code>notificacion_id</code>), <code>enviada</code> (no <code>leida</code>), <code>enviada_en</code>.</td></tr>
+        <tr><td><code>src/app/api/agente/route.ts</code></td><td>POST público · streaming · <code>openai('gpt-4o-mini')</code> · <code>maxOutputTokens: 500</code> · <code>toTextStreamResponse()</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Fix crítico del servidor Supabase</h3>
+  <pre><span class="cm">// El overload deprecado devolvía SupabaseClient&lt;..., never&gt;</span>
+<span class="cm">// causando que .insert() tipara como never</span>
+<span class="cm">// Fix: forzar el overload correcto con CookieMethodsServer</span>
+<span class="kw">import</span> <span class="kw">type</span> { <span class="ty">CookieMethodsServer</span> } <span class="kw">from</span> <span class="str">'@supabase/ssr/dist/main/types'</span>
+<span class="kw">import</span> <span class="kw">type</span> { <span class="ty">SupabaseClient</span> } <span class="kw">from</span> <span class="str">'@supabase/supabase-js'</span>
+
+<span class="kw">const</span> cookieMethods: <span class="ty">CookieMethodsServer</span> = { <span class="fn">getAll</span>() {...}, <span class="fn">setAll</span>(cookiesToSet) {...} }
+<span class="kw">const</span> client = <span class="fn">createServerClient</span>(URL, KEY, { cookies: cookieMethods })
+<span class="kw">return</span> client <span class="kw">as unknown as</span> <span class="ty">SupabaseClient</span>&lt;<span class="ty">Database</span>&gt;</pre>
+</section>
+
+<!-- ═══ SPRINT 3 ═══ -->
+<section id="sprint3">
+  <div class="section-title"><span class="icon">✅</span> Sprint 3 — Dashboard Kanban</div>
+
+  <div class="callout callout-green">
+    <div class="callout-icon">✅</div>
+    <div class="callout-body">
+      <div class="callout-title">Auditoría ejecutada y aprobada: 11/11 checks — 2026-04-05</div>
+      <p>Durante la auditoría se detectó y corrigió un bug crítico: las columnas del Kanban en código no coincidían con el CHECK constraint real de la BD. Fue corregido antes del merge. El test queda como guardia permanente.</p>
+    </div>
+  </div>
+
+  <h3>Flujo completo de movimiento</h3>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-content">
+        <div class="flow-title">Socio hace clic en "Mover" en ProspectoCard</div>
+        <div class="flow-detail">UI de solo lectura — temperatura es badge, no input</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-content">
+        <div class="flow-title">MoverModal abre — muestra columnas válidas del CHECK constraint</div>
+        <div class="flow-detail">Filtra la columna actual del select. Nota opcional para audit trail.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-content">
+        <div class="flow-title">useMoverProspecto.mover(prospecto_id, destino, nota)</div>
+        <div class="flow-detail"><code>kanban.service → POST /api/kanban/mover</code> con <code>credentials: 'include'</code></div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-content">
+        <div class="flow-title">API Route verifica auth.getUser()</div>
+        <div class="flow-detail">→ 401 si no hay sesión → KanbanBoard muestra botón redirect a /login</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-content">
+        <div class="flow-title">supabase.rpc('mover_kanban', {...})</div>
+        <div class="flow-detail">Función atómica en PostgreSQL. <code>p_nota: nota ?? undefined</code> (no null)</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">6</div>
+      <div class="flow-content">
+        <div class="flow-title">Transacción PG: UPDATE prospectos + INSERT movimientos_kanban</div>
+        <div class="flow-detail">Trigger actualiza <code>actualizado_en</code>. Movimiento queda en audit trail inmutable.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">7</div>
+      <div class="flow-content">
+        <div class="flow-title">useKanban.recargar() → tablero actualizado en pantalla</div>
+        <div class="flow-detail">KanbanBoard renderiza el tablero refrescado</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SPRINTS PENDIENTES ═══ -->
+<section id="sprint4">
+  <div class="section-title"><span class="icon">🔲</span> Sprints Pendientes</div>
+  <div class="sprint-list">
+    <div class="sprint">
+      <div class="sprint-icon">🤖</div>
+      <div class="sprint-body">
+        <div class="sprint-title">Sprint 4 — Agente Conversacional con IA</div>
+        <div class="sprint-desc">Setup Vercel AI SDK v6, motor de calificación, motor de recomendación (lenguaje legal desde BD), flujo de agendamiento, landing pública por campaña.</div>
+        <div class="sprint-tags">
+          <span class="badge badge-purple">AI SDK v6</span>
+          <span class="badge badge-blue">streaming</span>
+          <span class="badge badge-gray">gpt-4o-mini</span>
+          <span class="badge badge-amber">lenguaje legal</span>
+        </div>
+      </div>
+    </div>
+    <div class="sprint">
+      <div class="sprint-icon">🌐</div>
+      <div class="sprint-body">
+        <div class="sprint-title">Sprint 5 — Landing Pages Personalizadas</div>
+        <div class="sprint-desc">Página pública por socio usando <code>socio_assets</code>. Multi-foto, enlace a agente conversacional.</div>
+        <div class="sprint-tags">
+          <span class="badge badge-blue">socio_assets</span>
+          <span class="badge badge-gray">SEO</span>
+        </div>
+      </div>
+    </div>
+    <div class="sprint">
+      <div class="sprint-icon">🔔</div>
+      <div class="sprint-body">
+        <div class="sprint-title">Sprint 6 — Notificaciones + Crons</div>
+        <div class="sprint-desc">Edge Functions para notificaciones push. Crons para ciclos de consumo y recordatorios de seguimiento.</div>
+        <div class="sprint-tags">
+          <span class="badge badge-blue">Edge Functions</span>
+          <span class="badge badge-purple">ciclos_consumo</span>
+        </div>
+      </div>
+    </div>
+    <div class="sprint">
+      <div class="sprint-icon">💊</div>
+      <div class="sprint-body">
+        <div class="sprint-title">Sprint 7 — Módulo MLM Bienestar</div>
+        <div class="sprint-desc">Validación de ingredientes por país, cumplimiento regulatorio completo, ciclos de recompra de 6 meses, reportes de red MLM.</div>
+        <div class="sprint-tags">
+          <span class="badge badge-green">MLM</span>
+          <span class="badge badge-amber">regulatorio</span>
+          <span class="badge badge-purple">ciclos 6 meses</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ API ROUTES ═══ -->
+<section id="api-routes">
+  <div class="section-title"><span class="icon">🛣️</span> API Routes</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Método</th><th>Ruta</th><th>Auth</th><th>Descripción</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/kanban/prospectos</code></td><td><span class="badge badge-green">Sesión</span></td><td>Devuelve prospectos agrupados por columna. Zod valida. RLS filtra por tenant_id.</td></tr>
+        <tr><td><span class="badge badge-purple">POST</span></td><td><code>/api/kanban/mover</code></td><td><span class="badge badge-green">Sesión</span></td><td>Body: <code>{prospecto_id, destino, nota?}</code>. Llama <code>mover_kanban()</code> RPC atómica.</td></tr>
+        <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/campanas</code></td><td><span class="badge badge-green">Sesión</span></td><td>Lista campañas del tenant.</td></tr>
+        <tr><td><span class="badge badge-purple">POST</span></td><td><code>/api/campanas</code></td><td><span class="badge badge-green">Sesión</span></td><td>Crea campaña. Usa <code>CampanaInsert</code> type para evitar <code>never</code>. <code>tenant_id</code> desde JWT.</td></tr>
+        <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/notificaciones</code></td><td><span class="badge badge-green">Sesión</span></td><td>Notificaciones del socio. Columna <code>notif_id</code>, campo <code>enviada</code>.</td></tr>
+        <tr><td><span class="badge badge-amber">PATCH</span></td><td><code>/api/notificaciones</code></td><td><span class="badge badge-green">Sesión</span></td><td>Marca como enviada.</td></tr>
+        <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/disponibilidad</code></td><td><span class="badge badge-green">Sesión</span></td><td>Query: <code>?servicio_id=UUID&amp;fecha=YYYY-MM-DD</code>. Devuelve slots disponibles.</td></tr>
+        <tr><td><span class="badge badge-purple">POST</span></td><td><code>/api/agente</code></td><td><span class="badge badge-gray">Público</span></td><td>Streaming. Carga KB + productos por campaña. <code>gpt-4o-mini</code>, <code>maxOutputTokens: 500</code>, <code>toTextStreamResponse()</code>.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ COLUMNAS KANBAN ═══ -->
+<section id="kanban-cols">
+  <div class="section-title"><span class="icon">📋</span> Columnas Kanban — Valores exactos del CHECK constraint</div>
+
+  <div class="callout callout-red">
+    <div class="callout-icon">🚨</div>
+    <div class="callout-body">
+      <div class="callout-title">Bug crítico detectado en auditoría Sprint 3</div>
+      <p>Los valores originales en código (<code>calificado</code>, <code>interesado</code>, <code>negociacion</code>, <code>perdido</code>, <code>descartado</code>) NO existían en el CHECK constraint de la BD. Reemplazados por los 9 valores reales abajo.</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Valor en BD (exacto)</th><th>Etiqueta en UI</th><th>Tipo</th><th>Color borde</th></tr></thead>
+      <tbody>
+        <tr><td><code>nuevo_prospecto</code></td><td>Nuevo prospecto</td><td><span class="badge badge-gray">Entrada</span></td><td>neutral-400</td></tr>
+        <tr><td><code>contactado</code></td><td>Contactado</td><td><span class="badge badge-blue">Progreso</span></td><td>blue-400</td></tr>
+        <tr><td><code>en_seguimiento</code></td><td>En seguimiento</td><td><span class="badge badge-blue">Progreso</span></td><td>indigo-400</td></tr>
+        <tr><td><code>propuesta_enviada</code></td><td>Propuesta enviada</td><td><span class="badge badge-blue">Progreso</span></td><td>amber-400</td></tr>
+        <tr><td><code>listo_para_cerrar</code></td><td>Listo para cerrar</td><td><span class="badge badge-blue">Progreso</span></td><td>green-400</td></tr>
+        <tr><td><code>cliente_activo</code></td><td>Cliente activo</td><td><span class="badge badge-green">Final ✅</span></td><td>green-600</td></tr>
+        <tr><td><code>no_interesado</code></td><td>No interesado</td><td><span class="badge badge-red">Final ❌</span></td><td>red-400</td></tr>
+        <tr><td><code>sin_respuesta</code></td><td>Sin respuesta</td><td><span class="badge badge-amber">Riesgo ⚠️</span></td><td>orange-400</td></tr>
+        <tr><td><code>reagendar</code></td><td>Reagendar</td><td><span class="badge badge-amber">Riesgo ⚠️</span></td><td>violet-400</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Estos 9 valores están en <code>COLUMNAS_KANBAN</code> en <code>src/features/kanban/types/kanban.types.ts</code>, <code>KanbanColumn.tsx</code>, <code>MoverModal.tsx</code>, y <code>kanban.service.ts</code>. Cualquier valor fuera de esta lista es rechazado por la BD.</p>
+</section>
+
+<!-- ═══ DECISIONES ═══ -->
+<section id="decisiones">
+  <div class="section-title"><span class="icon">📌</span> Decisiones de Arquitectura (No cambiar)</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Decisión</th><th>Razón</th></tr></thead>
+      <tbody>
+        <tr><td><code>pais_id</code> vive en <code>campanas</code>, no en <code>socios</code></td><td>Un socio puede operar en N países simultáneamente</td></tr>
+        <tr><td><code>condiciones_salud.nombre</code> es VARCHAR libre</td><td>Admin agrega condiciones sin deploy</td></tr>
+        <tr><td><code>modulo_destino</code> es VARCHAR libre</td><td>Extensible a cualquier nicho sin migration</td></tr>
+        <tr><td><code>movimientos_kanban</code> es inmutable (solo INSERT)</td><td>Audit trail legal del pipeline</td></tr>
+        <tr><td><code>lenguaje_agente</code> se escribe una vez en BD</td><td>El agente nunca improvisa texto legal</td></tr>
+        <tr><td><code>registro_sanitario</code> en <code>productos_por_pais</code></td><td>Escudo legal por país — sin él el agente no opera</td></tr>
+        <tr><td><code>agendar_cita()</code> usa <code>FOR UPDATE NOWAIT</code></td><td>Doble-booking imposible bajo concurrencia</td></tr>
+        <tr><td><code>foto_url</code> en socios + tabla <code>socio_assets</code></td><td><code>foto_url</code> para compatibilidad; <code>socio_assets</code> para landing multi-foto</td></tr>
+        <tr><td>Frontend NUNCA llama a Supabase directamente</td><td>Todo pasa por API Routes. El servidor aplica RLS. No se puede suplantar tenant_id.</td></tr>
+        <tr><td>No separar <code>ARQUITECTURA_KANBAN.md</code></td><td>El documento maestro único es más fácil de mantener y consultar</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ ERRORES RESUELTOS ═══ -->
+<section id="errores">
+  <div class="section-title"><span class="icon">🐛</span> Errores Críticos Resueltos (Auto-blindaje)</div>
+
+  <h3>1. Auth Hook en schema incorrecto</h3>
+  <p><strong style="color:var(--text)">Problema:</strong> Management API bloqueó crear <code>custom_access_token_hook</code> en schema <code>auth</code>.<br>
+  <strong style="color:var(--text)">Fix:</strong> Crearlo en schema <code>public</code>. Supabase Dashboard acepta hooks de cualquier schema.</p>
+
+  <h3>2. createServerClient devuelve tipo never</h3>
+  <p><strong style="color:var(--text)">Problema:</strong> El overload deprecado <code>options: any</code> era seleccionado, devolviendo <code>SupabaseClient&lt;Database, ..., never&gt;</code>. Todos los <code>.insert()</code> tipaban como <code>never</code>.<br>
+  <strong style="color:var(--text)">Fix:</strong> Importar <code>CookieMethodsServer</code> para forzar el overload correcto + cast <code>as unknown as SupabaseClient&lt;Database&gt;</code>.</p>
+
+  <h3>3. Bug crítico — columnas Kanban no coincidían con BD</h3>
+  <p><strong style="color:var(--text)">Problema:</strong> Código tenía <code>calificado, interesado, negociacion, perdido, descartado</code>. La BD tiene 9 valores completamente diferentes.<br>
+  <strong style="color:var(--text)">Fix:</strong> Reemplazados en <code>kanban.types.ts</code>, <code>KanbanColumn.tsx</code>, <code>MoverModal.tsx</code>, <code>kanban.service.ts</code>. Detectado por audit test antes del merge.</p>
+
+  <h3>4. FK violation en audit test</h3>
+  <p><strong style="color:var(--text)">Problema:</strong> Test usaba UUID <code>00000000-...-0000</code> como <code>p_socio_id</code> → violaba FK constraint.<br>
+  <strong style="color:var(--text)">Fix:</strong> Query real del primer socio del tenant demo antes de llamar la función.</p>
+
+  <h3>5. Nombres de columnas incorrectos</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tabla</th><th>Nombre incorrecto asumido</th><th>Nombre real en BD</th></tr></thead>
+      <tbody>
+        <tr><td><code>notificaciones</code></td><td><code>notificacion_id</code>, <code>leida</code></td><td><code>notif_id</code>, <code>enviada</code>, <code>enviada_en</code></td></tr>
+        <tr><td><code>condicion_productos_por_pais</code></td><td><code>condicion_salud_id</code>, <code>contraindicaciones_agente</code></td><td><code>condicion_id</code>, <code>razon_recomendacion</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>6. AI SDK v6 — nombres cambiados</h3>
+  <p><code>maxTokens</code> → <code>maxOutputTokens</code> &nbsp;|&nbsp; <code>toDataStreamResponse()</code> → <code>toTextStreamResponse()</code></p>
+
+  <h3>7. p_nota: null no aceptado por mover_kanban()</h3>
+  <p>La función PG espera <code>string | undefined</code>, no <code>null</code>. Fix: <code>p_nota: nota ?? undefined</code>.</p>
+
+  <h3>8. Auth Hook asignado al hook equivocado</h3>
+  <p><strong style="color:var(--text)">Problema:</strong> <code>custom_access_token_hook</code> estaba asignado al "Send Email hook" en el Dashboard (hook incorrecto).<br>
+  <strong style="color:var(--text)">Fix:</strong> Eliminar ambos hooks → re-agregar solo en "Customize Access Token (JWT) Claims hook" → verificar ENABLED.</p>
+</section>
+
+<!-- ═══ CREDENCIALES ═══ -->
+<section id="credenciales">
+  <div class="section-title"><span class="icon">🔑</span> Credenciales del Proyecto</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Recurso</th><th>Valor</th></tr></thead>
+      <tbody>
+        <tr><td>Supabase Project Ref</td><td><code>rgcntceelzttponmehte</code></td></tr>
+        <tr><td>Supabase URL</td><td><code>https://rgcntceelzttponmehte.supabase.co</code></td></tr>
+        <tr><td>tenant_id demo</td><td><code>00000000-0000-0000-0000-000000000001</code></td></tr>
+        <tr><td>prospecto_id test</td><td><code>60000000-0000-0000-0000-000000000001</code> (Carlos Vargas)</td></tr>
+        <tr><td>Regenerar tipos</td><td><code>SUPABASE_ACCESS_TOKEN=... npx supabase gen types typescript --project-id rgcntceelzttponmehte > src/lib/supabase/types.ts</code></td></tr>
+        <tr><td>Ejecutar audit test</td><td><code>$env:SUPABASE_SERVICE_ROLE_KEY="..." ; npx tsx tests/audit-kanban.test.ts</code></td></tr>
+        <tr><td>Variables .env.local</td><td><code>SUPABASE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-amber">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <div class="callout-title">Verificar antes de Sprint 4</div>
+      <p>1. Auth Hook activo en Dashboard → Authentication → Hooks → Customize Access Token → <code>public.custom_access_token_hook</code> → ENABLED<br>
+      2. Ejecutar <code>npx tsx tests/audit-kanban.test.ts</code> para confirmar 11/11 checks pasados<br>
+      3. Confirmar que <code>npm run build</code> compila sin errores de tipos</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <p style="text-align:center; font-size:11px; color:var(--muted)">Generado automáticamente · Sprint 3 completado · 2026-04-04 · SaaS Multi-Nicho</p>
+</section>
+
+</div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /page -->
+</body>
+</html>

@@ -1,0 +1,67 @@
+﻿
+> saas-factory-app@0.1.0 build
+> next build
+
+node.exe : ÔÜá Warning: Next.js inferred 
+your workspace root, but it may not be 
+correct.
+En línea: 1 Carácter: 1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Users\Fabio\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified:  
+   (ÔÜá Warning: Ne...not be correct.:Strin  
+  g) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandE 
+   rror
+ 
+ We detected multiple lockfiles and selected 
+the directory of 
+C:\saasmultinicho\package-lock.json as the 
+root directory.
+ To silence this warning, set 
+`turbopack.root` in your Next.js config, or 
+consider removing one of the lockfiles if 
+it's not needed.
+   See https://nextjs.org/docs/app/api-refere
+nce/config/next-config-js/turbopack#root-dire
+ctory for more information.
+ Detected additional lockfiles: 
+   * C:\saasmultinicho\mi-nuevo-saas\package-
+lock.json
+
+Ôû▓ Next.js 16.2.2 (Turbopack)
+- Environments: .env.local
+
+ÔÜá The "middleware" file convention is 
+deprecated. Please use "proxy" instead. 
+Learn more: https://nextjs.org/docs/messages/
+middleware-to-proxy
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 3.1s
+  Running TypeScript ...
+Failed to type check.
+
+./src/app/api/auditoria/restaurar/route.ts:18
+5:22
+Type error: Property 'log_id' does not exist 
+on type 'SelectQueryError<"Invalid 
+Relationships cannot infer result type"> | { 
+log_id: any; }'.
+  Property 'log_id' does not exist on type 
+'SelectQueryError<"Invalid Relationships 
+cannot infer result type">'.
+
+  [90m183 |[0m   [36mreturn[0m 
+[33mNextResponse[0m.json({
+  [90m184 |[0m     prospecto_id,
+[31m[1m>[0m [90m185 |[0m     log_id: 
+logEntry.log_id,
+  [90m    |[0m                      
+[31m[1m^[0m
+  [90m186 |[0m   })
+  [90m187 |[0m }
+  [90m188 |[0m
+Next.js build worker exited with code: 1 and 
+signal: null

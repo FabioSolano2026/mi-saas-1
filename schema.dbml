@@ -1,0 +1,488 @@
+// ============================================================
+// DBML — SaaS Multi-Nicho
+// Proyecto: rgcntceelzttponmehte
+// Sprint 1 completo — 20 tablas
+// Generado: 2026-04-04
+// ============================================================
+
+Project SaaSMultiNicho {
+  database_type: 'PostgreSQL'
+  Note: '''
+    Sistema multi-tenant multi-nicho.
+    Nucleo universal (aeropuerto) + modulos especializados por nicho.
+    RLS activo en todas las tablas. tenant_id en toda tabla del nucleo.
+  '''
+}
+
+// ============================================================
+// CAPA 0 — RAIZ
+// ============================================================
+
+Table tenants {
+  tenant_id      uuid        [pk, default: `gen_random_uuid()`]
+  nombre         varchar(150) [not null]
+  industria      varchar(100)
+  modulo_activo  varchar(50)
+  plan           text        [not null, default: 'starter', note: 'starter | professional | enterprise']
+  dominio_custom varchar(200)
+  requiere_cita  boolean     [not null, default: false]
+  activo         boolean     [not null, default: true]
+  creado_en      timestamptz [not null, default: `now()`]
+
+  Note: 'Raiz del sistema. Un registro por cliente de la plataforma.'
+}
+
+// ============================================================
+// CAPA 1 — IDENTIDAD
+// ============================================================
+
+Table paises {
+  pais_id   uuid        [pk, default: `gen_random_uuid()`]
+  codigo    varchar(5)  [unique, not null, note: 'CR | MX | CO | US | PA | GT']
+  nombre    varchar(100) [not null]
+  moneda    varchar(10) [not null, note: 'CRC | MXN | COP | USD | GTQ']
+  activo    boolean     [not null, default: true]
+  creado_en timestamptz [not null, default: `now()`]
+
+  Note: 'Catalogo global compartido. Sin tenant_id por diseno. Eje de la localizacion geografica.'
+}
+
+Table socios {
+  usuario_id         uuid        [pk, note: 'FK a auth.users(id) ON DELETE CASCADE']
+  tenant_id          uuid        [not null, ref: > tenants.tenant_id]
+  nombre_completo    varchar(100) [not null]
+  correo             varchar(150) [unique, not null]
+  telefono           varchar(20)
+  pais_registro      varchar(5)  [ref: > paises.codigo, note: 'Solo facturacion. No determina paises de operacion']
+  foto_url           varchar(500)
+  avatar_url         varchar(500)
+  voz_url            varchar(500)
+  tier               text        [not null, default: 'free', note: 'free | premium_texto | premium_voz | premium_avatar']
+  estado             text        [not null, default: 'activo', note: 'activo | inactivo | suspendido']
+  fecha_ingreso      timestamptz [not null, default: `now()`]
+  fecha_inicio_pago  timestamptz
+  fecha_fin_campana  timestamptz
+  creado_en          timestamptz [not null, default: `now()`]
+  actualizado_en     timestamptz [not null, default: `now()`, note: 'Trigger: trg_socios_actualizado_en']
+
+  Note: 'Usuarios del sistema. Vinculados a auth.users de Supabase. tier determina agente disponible.'
+}
+
+// ============================================================
+// CAPA 2 — CEREBRO DEL AGENTE
+// ============================================================
+
+Table knowledge_bases {
+  kb_id                   uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id               uuid        [not null, ref: > tenants.tenant_id]
+  condicion               varchar(100) [not null]
+  version                 varchar(20) [not null, default: '1.0']
+  sintomas_json           jsonb       [not null, default: `'[]'`, note: 'Frases reales del prospecto en lenguaje WhatsApp']
+  preguntas_json          jsonb       [not null, default: `'[]'`, note: '3 preguntas de calificacion con respuestas del agente']
+  objeciones_json         jsonb       [not null, default: `'[]'`, note: 'Objeciones frecuentes con respuesta exacta y tono']
+  lenguaje_prohibido_json jsonb       [not null, default: `'[]'`, note: 'Lista negra con reemplazo legal exacto']
+  protocolo_derivacion    text        [note: 'Texto fijo para senales de alerta medica']
+  visible_para_socios     boolean     [not null, default: false, note: 'Siempre FALSE. El socio nunca ve el contenido']
+  tipo_kb                 text        [not null, default: 'producto', note: 'producto | reclutamiento | posventa']
+  solo_admin              boolean     [not null, default: true]
+  creado_en               timestamptz [not null, default: `now()`]
+  actualizado_en          timestamptz [not null, default: `now()`, note: 'Trigger: trg_knowledge_bases_actualizado_en']
+
+  Note: 'Cerebro del agente. 5 secciones JSONB. Solo el admin puede editar.'
+}
+
+Table condiciones_salud {
+  condicion_id      uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id         uuid        [not null, ref: > tenants.tenant_id]
+  nombre            varchar(100) [unique, not null, note: 'VARCHAR libre, no ENUM. Admin agrega condiciones sin deploy']
+  descripcion       text
+  icono_url         varchar(500)
+  knowledge_base_id uuid        [ref: > knowledge_bases.kb_id]
+  activa            boolean     [not null, default: true]
+  solo_admin        boolean     [not null, default: false, note: 'TRUE = en preparacion, invisible para socios']
+  orden_display     integer     [not null, default: 0, note: 'Orden en selector. 0 = primera posicion']
+  creado_en         timestamptz [not null, default: `now()`]
+  actualizado_en    timestamptz [not null, default: `now()`, note: 'Trigger: trg_condiciones_salud_actualizado_en']
+
+  indexes {
+    (tenant_id, orden_display) [name: 'idx_condiciones_orden', note: 'WHERE activa = TRUE']
+  }
+
+  Note: 'Catalogo abierto. nombre es VARCHAR libre para que admin agregue condiciones sin deploy.'
+}
+
+// ============================================================
+// CAPA 3 — OPERACION MULTI-PAIS
+// ============================================================
+
+Table campanas {
+  campana_id         uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id          uuid        [not null, ref: > tenants.tenant_id]
+  socio_id           uuid        [ref: > socios.usuario_id, note: 'ON DELETE SET NULL']
+  pais_id            uuid        [not null, ref: > paises.pais_id, note: 'El pais vive aqui, no en socios. Multi-pais nativo.']
+  nombre             varchar(100) [not null]
+  condicion_salud_id uuid        [ref: > condiciones_salud.condicion_id]
+  tipo               text        [not null, default: 'producto', note: 'producto | reclutamiento']
+  modulo_destino     varchar(50) [not null, default: 'mlm_bienestar', note: 'VARCHAR libre. Extensible sin deploy.']
+  requiere_cita      boolean     [not null, default: false, note: 'TRUE activa flujo de agendamiento al finalizar calificacion']
+  landing_url        varchar(500)
+  knowledge_base_id  uuid        [ref: > knowledge_bases.kb_id, note: 'NULL = hereda KB de la condicion']
+  agente_tipo        text        [not null, default: 'texto', note: 'texto | voz | avatar. Segun tier del socio']
+  estado             text        [not null, default: 'activa', note: 'activa | pausada | finalizada']
+  fecha_inicio       timestamptz [not null, default: `now()`]
+  fecha_fin          timestamptz
+  creado_en          timestamptz [not null, default: `now()`]
+
+  indexes {
+    (tenant_id, estado) [name: 'idx_campanas_tenant_estado', note: 'WHERE estado = activa']
+    (socio_id) [name: 'idx_campanas_socio', note: 'WHERE socio_id IS NOT NULL']
+    (pais_id, tenant_id) [name: 'idx_campanas_pais']
+  }
+
+  Note: 'Un socio puede tener campanas activas en N paises simultaneamente. modulo_destino es VARCHAR libre.'
+}
+
+// ============================================================
+// CAPA 4 — CATALOGO DE PRODUCTOS
+// ============================================================
+
+Table ingredientes {
+  ingrediente_id  uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id       uuid        [not null, ref: > tenants.tenant_id]
+  nombre          varchar(150) [not null]
+  descripcion     text
+  usos_json       jsonb       [not null, default: `'[]'`, note: 'beneficio, lenguaje_legal, lenguaje_prohibido']
+  estudios_json   jsonb       [not null, default: `'[]'`, note: 'titulo, institucion, ano, url, resumen_agente, nivel']
+  puede_citar     boolean     [not null, default: true]
+  nivel_evidencia text        [not null, default: 'medio', note: 'alto: cita directa | medio: investigaciones sugieren | referencial: menciona sin citar']
+  creado_en       timestamptz [not null, default: `now()`]
+  actualizado_en  timestamptz [not null, default: `now()`, note: 'Trigger: trg_ingredientes_actualizado_en']
+
+  indexes {
+    (tenant_id, nombre) [unique]
+  }
+
+  Note: 'nivel_evidencia controla exactamente como habla el agente de cada ingrediente.'
+}
+
+Table productos {
+  producto_id    uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id      uuid        [not null, ref: > tenants.tenant_id]
+  nombre         varchar(100) [not null, note: 'Nombre base sin sufijos locales']
+  descripcion    text
+  imagen_url     varchar(500)
+  activo         boolean     [not null, default: true]
+  creado_en      timestamptz [not null, default: `now()`]
+  actualizado_en timestamptz [not null, default: `now()`, note: 'Trigger: trg_productos_actualizado_en']
+
+  indexes {
+    (tenant_id, nombre) [unique]
+  }
+
+  Note: 'Catalogo base SIN localizacion. Precio y nombre local viven en productos_por_pais.'
+}
+
+Table producto_ingredientes {
+  id             uuid         [pk, default: `gen_random_uuid()`]
+  producto_id    uuid         [not null, ref: > productos.producto_id, note: 'ON DELETE CASCADE']
+  ingrediente_id uuid         [not null, ref: > ingredientes.ingrediente_id, note: 'ON DELETE RESTRICT']
+  cantidad_mg    decimal(8,2)
+  rol            varchar(200) [not null, note: 'Para que sirve ESTE ingrediente en ESTE producto especificamente']
+  orden_display  integer      [not null, default: 0, note: 'Orden en que el agente menciona los ingredientes']
+
+  indexes {
+    (producto_id, ingrediente_id) [unique]
+    (producto_id) [name: 'idx_prod_ing_producto']
+  }
+
+  Note: 'Tabla puente N:N. orden_display controla el orden de mencion del agente.'
+}
+
+Table productos_por_pais {
+  id                 uuid          [pk, default: `gen_random_uuid()`]
+  producto_id        uuid          [not null, ref: > productos.producto_id, note: 'ON DELETE CASCADE']
+  pais_id            uuid          [not null, ref: > paises.pais_id]
+  nombre_local       varchar(150)  [note: 'Nombre del producto en ese pais si difiere del base']
+  precio_local       decimal(10,2) [not null]
+  moneda_local       varchar(10)   [not null]
+  registro_sanitario varchar(100)  [note: 'Escudo legal. Sin este campo el agente no puede operar legalmente']
+  ente_regulador     varchar(100)  [note: 'MINSA | COFEPRIS | INVIMA | FDA']
+  disponible         boolean       [not null, default: true, note: 'FALSE = agente pasa al siguiente producto en prioridad']
+  creado_en          timestamptz   [not null, default: `now()`]
+  actualizado_en     timestamptz   [not null, default: `now()`, note: 'Trigger: trg_productos_por_pais_actualizado_en']
+
+  indexes {
+    (producto_id, pais_id) [unique]
+    (pais_id, disponible) [name: 'idx_ppp_pais_disponible', note: 'WHERE disponible = TRUE']
+  }
+
+  Note: 'Precio local + registro sanitario por pais. El agente solo recomienda donde disponible = TRUE.'
+}
+
+Table condicion_productos_por_pais {
+  id                  uuid    [pk, default: `gen_random_uuid()`]
+  condicion_id        uuid    [not null, ref: > condiciones_salud.condicion_id]
+  producto_id         uuid    [not null, ref: > productos.producto_id, note: 'ON DELETE CASCADE']
+  pais_id             uuid    [not null, ref: > paises.pais_id]
+  prioridad           integer [not null, default: 1, note: '1 = producto principal. Max 5 por condicion por pais']
+  razon_recomendacion text    [note: 'Texto interno para el admin. El agente no lo lee']
+  lenguaje_agente     text    [not null, note: 'Frase EXACTA del agente. Se escribe una vez, se usa siempre.']
+  activo              boolean [not null, default: true]
+  creado_en           timestamptz [not null, default: `now()`]
+
+  indexes {
+    (condicion_id, producto_id, pais_id) [unique]
+    (condicion_id, pais_id, prioridad) [name: 'idx_cppp_lookup', note: 'WHERE activo = TRUE']
+  }
+
+  Note: 'La matriz de recomendacion. lenguaje_agente es la frase exacta — el agente nunca improvisa.'
+}
+
+// ============================================================
+// CAPA 5 — CRM KANBAN
+// ============================================================
+
+Table prospectos {
+  prospecto_id          uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id             uuid        [not null, ref: > tenants.tenant_id]
+  socio_id              uuid        [ref: > socios.usuario_id, note: 'ON DELETE SET NULL']
+  campana_id            uuid        [ref: > campanas.campana_id, note: 'ON DELETE SET NULL']
+  nombre                varchar(100)
+  telefono              varchar(20)
+  correo                varchar(150)
+  pais_id               uuid        [ref: > paises.pais_id]
+  origen                varchar(100)
+  canal_agente          text        [not null, default: 'manual', note: 'texto | voz | avatar | manual']
+  columna_kanban        text        [not null, default: 'nuevo_prospecto', note: '9 valores: nuevo_prospecto | contactado | en_seguimiento | propuesta_enviada | listo_para_cerrar | cliente_activo | no_interesado | sin_respuesta | reagendar']
+  temperatura           text        [not null, default: 'frio', note: 'frio | tibio | caliente']
+  intencion             text        [not null, default: 'ninguno', note: 'producto | negocio | ambos | ninguno']
+  respuestas_json       jsonb       [not null, default: `'{}'`, note: 'Respuestas exactas a las 3 preguntas del agente']
+  transcripcion_texto   text        [note: 'Solo visible si compartido_por_admin = TRUE']
+  transcripcion_voz_url varchar(500)
+  nota_agente           text        [note: 'Resumen de una linea generado por el agente al terminar']
+  nota_socio            text
+  ultimo_pedido_id      uuid        [note: 'Nullable. Se activa en Fase 2']
+  cita_id               uuid        [note: 'Nullable. Se vincula al agendar via agendar_cita()']
+  visible_para_socio    boolean     [not null, default: true]
+  compartido_por_admin  boolean     [not null, default: false, note: 'Toggle manual por tarjeta para ver transcripcion']
+  ultimo_contacto       timestamptz [not null, default: `now()`]
+  dias_sin_contacto     integer     [not null, default: 0, note: 'Calculado. Alerta a las 72h']
+  creado_en             timestamptz [not null, default: `now()`]
+  actualizado_en        timestamptz [not null, default: `now()`, note: 'Trigger: trg_prospectos_actualizado_en']
+
+  indexes {
+    (tenant_id, socio_id, columna_kanban) [name: 'idx_prospectos_kanban', note: 'WHERE visible_para_socio = TRUE']
+    (tenant_id, dias_sin_contacto) [name: 'idx_prospectos_riesgo', note: 'WHERE columna NOT IN cliente_activo, no_interesado, sin_respuesta']
+    (tenant_id, temperatura, columna_kanban) [name: 'idx_prospectos_temperatura']
+  }
+
+  Note: 'Corazon del CRM. Cada tarjeta del Kanban es un registro. 9 columnas. transcripcion privada por defecto.'
+}
+
+Table movimientos_kanban {
+  movimiento_id   uuid        [pk, default: `gen_random_uuid()`]
+  prospecto_id    uuid        [not null, ref: > prospectos.prospecto_id, note: 'ON DELETE CASCADE']
+  socio_id        uuid        [ref: > socios.usuario_id, note: 'ON DELETE SET NULL. NULL = accion del agente automatico']
+  columna_origen  varchar(30) [not null]
+  columna_destino varchar(30) [not null]
+  nota            text
+  creado_en       timestamptz [not null, default: `now()`, note: 'NUNCA se modifica. Sin trigger de actualizado_en.']
+
+  indexes {
+    (prospecto_id, creado_en) [name: 'idx_movimientos_prospecto']
+  }
+
+  Note: 'Audit trail INMUTABLE. Solo INSERT. UPDATE y DELETE bloqueados por RLS. Fuente de verdad del pipeline.'
+}
+
+// ============================================================
+// CAPA 6 — ALERTAS Y RETENCION
+// ============================================================
+
+Table notificaciones {
+  notif_id     uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id    uuid        [not null, ref: > tenants.tenant_id]
+  socio_id     uuid        [ref: > socios.usuario_id, note: 'ON DELETE SET NULL']
+  prospecto_id uuid        [ref: > prospectos.prospecto_id, note: 'ON DELETE SET NULL. NULL = resumen diario']
+  tipo         text        [not null, note: 'prospecto_caliente | tarjeta_en_riesgo | resumen_diario']
+  canal        text        [not null, note: 'whatsapp | push | email']
+  mensaje      text        [not null]
+  enviada      boolean     [not null, default: false]
+  enviada_en   timestamptz
+  creado_en    timestamptz [not null, default: `now()`]
+
+  indexes {
+    (tenant_id, enviada, creado_en) [name: 'idx_notif_pendientes', note: 'WHERE enviada = FALSE']
+    (socio_id, tipo, creado_en) [name: 'idx_notif_socio', note: 'WHERE socio_id IS NOT NULL']
+  }
+
+  Note: 'Registro de cada alerta. Evita duplicados y habilita reintentos del cron sin bombardear al socio.'
+}
+
+Table pedidos {
+  pedido_id               uuid          [pk, default: `gen_random_uuid()`]
+  tenant_id               uuid          [not null, ref: > tenants.tenant_id]
+  prospecto_id            uuid          [not null, ref: > prospectos.prospecto_id]
+  producto_id             uuid          [not null, ref: > productos.producto_id]
+  pais_id                 uuid          [not null, ref: > paises.pais_id]
+  socio_id                uuid          [ref: > socios.usuario_id, note: 'ON DELETE SET NULL']
+  fecha_compra            timestamptz   [not null, default: `now()`]
+  numero_tracking         varchar(100)
+  courier                 varchar(100)
+  estado_envio            text          [not null, default: 'pendiente', note: 'pendiente | en_camino | entregado | problema']
+  fecha_estimada_entrega  timestamptz
+  precio_pagado           decimal(10,2) [not null]
+  moneda                  varchar(10)   [not null]
+  notas                   text
+
+  indexes {
+    (prospecto_id, tenant_id) [name: 'idx_pedidos_prospecto']
+  }
+
+  Note: 'VACIA en Sprint 1. Se activa en Fase 2. prospectos.ultimo_pedido_id apunta aqui.'
+}
+
+Table ciclos_consumo {
+  ciclo_id                uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id               uuid        [not null, ref: > tenants.tenant_id]
+  prospecto_id            uuid        [not null, ref: > prospectos.prospecto_id]
+  pedido_inicial_id       uuid        [not null, ref: > pedidos.pedido_id]
+  mes_actual              integer     [not null, default: 1, note: 'Va de 1 a 6+. Minimo recomendado 6 meses']
+  fecha_inicio_ciclo      timestamptz [not null, default: `now()`]
+  fecha_proximo_contacto  timestamptz [not null]
+  estado                  text        [not null, default: 'activo', note: 'activo | pausado | completado | abandonado']
+  total_meses_completados integer     [not null, default: 0]
+
+  indexes {
+    (tenant_id, fecha_proximo_contacto) [name: 'idx_ciclos_proximo_contacto', note: 'WHERE estado = activo']
+  }
+
+  Note: 'VACIA en Sprint 1. Corazon de la retencion. Sin esta tabla no hay recompra automatizada en Fase 2.'
+}
+
+// ============================================================
+// CAPA 7 — MODULO DE AGENDAMIENTO (compartido todos los nichos)
+// ============================================================
+
+Table servicios {
+  servicio_id      uuid          [pk, default: `gen_random_uuid()`]
+  tenant_id        uuid          [not null, ref: > tenants.tenant_id]
+  nombre           varchar(150)  [not null]
+  descripcion      text
+  duracion_minutos integer       [not null, note: 'Base para calcular slots automaticamente']
+  precio           decimal(10,2)
+  moneda           varchar(10)
+  color_calendario varchar(7)    [default: '#5B4DB8', note: 'Hex para el calendario del CRM']
+  activo           boolean       [not null, default: true]
+  creado_en        timestamptz   [not null, default: `now()`]
+
+  indexes {
+    (tenant_id, nombre) [unique]
+  }
+
+  Note: 'Lo que se puede agendar. duracion_minutos es la clave para el calculo de slots.'
+}
+
+Table recursos {
+  recurso_id  uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id   uuid        [not null, ref: > tenants.tenant_id]
+  nombre      varchar(100) [not null]
+  tipo        text        [not null, default: 'persona', note: 'persona | vehiculo | sala | equipo']
+  capacidad   integer     [not null, default: 1, note: 'capacidad > 1 habilita clases grupales']
+  activo      boolean     [not null, default: true]
+  creado_en   timestamptz [not null, default: `now()`]
+
+  indexes {
+    (tenant_id, nombre) [unique]
+  }
+
+  Note: 'Quien o que presta el servicio. Cada recurso tiene su propia disponibilidad.'
+}
+
+Table disponibilidad {
+  disponibilidad_id uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id         uuid        [not null, ref: > tenants.tenant_id]
+  recurso_id        uuid        [not null, ref: > recursos.recurso_id, note: 'ON DELETE CASCADE']
+  servicio_id       uuid        [not null, ref: > servicios.servicio_id, note: 'ON DELETE CASCADE']
+  fecha             date        [not null]
+  hora_inicio       time        [not null]
+  hora_fin          time        [not null, note: 'hora_inicio + duracion_minutos del servicio']
+  estado            text        [not null, default: 'disponible', note: 'disponible | reservado | bloqueado']
+  creado_en         timestamptz [not null, default: `now()`]
+
+  indexes {
+    (recurso_id, fecha, hora_inicio) [unique]
+    (tenant_id, fecha, estado) [name: 'idx_disp_slots_disponibles', note: 'WHERE estado = disponible']
+    (recurso_id, fecha, hora_inicio) [name: 'idx_disp_recurso_fecha']
+  }
+
+  Note: 'El agente solo muestra estado = disponible. agendar_cita() cambia a reservado atomicamente.'
+}
+
+Table citas {
+  cita_id                  uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id                uuid        [not null, ref: > tenants.tenant_id]
+  prospecto_id             uuid        [not null, ref: > prospectos.prospecto_id]
+  servicio_id              uuid        [not null, ref: > servicios.servicio_id]
+  recurso_id               uuid        [not null, ref: > recursos.recurso_id]
+  disponibilidad_id        uuid        [not null, ref: > disponibilidad.disponibilidad_id]
+  fecha                    date        [not null]
+  hora_inicio              time        [not null]
+  hora_fin                 time        [not null]
+  estado                   text        [not null, default: 'pendiente', note: 'pendiente | confirmada | recordatorio_enviado | completada | cancelada | no_asistio']
+  notas_agente             text
+  canal_origen             text        [not null, default: 'agente_texto', note: 'agente_texto | agente_voz | agente_avatar | manual']
+  recordatorio_24h_enviado boolean     [not null, default: false]
+  recordatorio_2h_enviado  boolean     [not null, default: false]
+  creado_en                timestamptz [not null, default: `now()`]
+  actualizado_en           timestamptz [not null, default: `now()`, note: 'Trigger: trg_citas_actualizado_en']
+
+  indexes {
+    (tenant_id, fecha, estado) [name: 'idx_citas_recordatorios', note: 'WHERE estado IN confirmada,recordatorio_enviado AND recordatorio_24h_enviado = FALSE']
+    (recurso_id, fecha, hora_inicio) [name: 'idx_citas_recurso_fecha', note: 'WHERE estado NOT IN cancelada,no_asistio']
+  }
+
+  Note: 'Destino final del agente cuando requiere_cita = TRUE. agendar_cita() garantiza no doble-booking.'
+}
+
+// ============================================================
+// CAPA 8 — LANDING ASSETS
+// ============================================================
+
+Table socio_assets {
+  asset_id  uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id uuid        [not null, ref: > tenants.tenant_id]
+  socio_id  uuid        [not null, ref: > socios.usuario_id, note: 'ON DELETE CASCADE']
+  tipo      text        [not null, note: 'foto_perfil | foto_banner | foto_testimonio | foto_antes | foto_despues | video_presentacion']
+  url       varchar(500) [not null]
+  alt_text  varchar(200) [note: 'Accesibilidad + SEO']
+  orden     integer     [not null, default: 0]
+  activo    boolean     [not null, default: true]
+  creado_en timestamptz [not null, default: `now()`]
+
+  indexes {
+    (socio_id, tipo, orden) [name: 'idx_socio_assets_landing', note: 'WHERE activo = TRUE']
+  }
+
+  Note: 'Assets multimedia del socio para su landing personalizada. Un socio puede tener N assets por tipo.'
+}
+
+// ============================================================
+// CAPA 9 — CONTROL DE MODULOS
+// ============================================================
+
+Table modulos_crm {
+  modulo_id    uuid        [pk, default: `gen_random_uuid()`]
+  tenant_id    uuid        [not null, ref: > tenants.tenant_id]
+  modulo       varchar(50) [not null, note: 'mlm_bienestar | salon_belleza | dental | escuela_manejo | academia | veterinaria | otro']
+  version      varchar(10) [not null, default: '1.0']
+  activo       boolean     [not null, default: true]
+  config_json  jsonb       [not null, default: `'{}'`, note: 'Configuracion especifica del modulo para este tenant']
+  instalado_en timestamptz [not null, default: `now()`]
+
+  indexes {
+    (tenant_id, modulo) [unique]
+  }
+
+  Note: 'Registro de que modulo CRM especializado tiene cada tenant. Activa/desactiva nichos sin borrar datos.'
+}

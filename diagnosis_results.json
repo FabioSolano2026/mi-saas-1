@@ -1,0 +1,65 @@
+{
+  "socios": [
+    {
+      "usuario_id": "5fae190f-29a0-423b-b796-bae351f66b3d",
+      "tenant_id": "980c2ba9-5062-42d1-9547-25a8b4471961",
+      "nombre_completo": "rqfabiosolano",
+      "correo": "rqfabiosolano@gmail.com",
+      "telefono": null,
+      "pais_registro": null,
+      "foto_url": null,
+      "avatar_url": null,
+      "voz_url": null,
+      "tier": "free",
+      "estado": "activo",
+      "fecha_ingreso": "2026-04-08 01:27:05.987543+00",
+      "fecha_inicio_pago": null,
+      "fecha_fin_campana": null,
+      "creado_en": "2026-04-08 01:27:05.987543+00",
+      "actualizado_en": "2026-04-08 01:27:05.987543+00"
+    }
+  ],
+  "tenants": [
+    {
+      "tenant_id": "980c2ba9-5062-42d1-9547-25a8b4471961",
+      "nombre": "rqfabiosolano",
+      "industria": null,
+      "modulo_activo": null,
+      "plan": "starter",
+      "dominio_custom": null,
+      "requiere_cita": false,
+      "activo": true,
+      "creado_en": "2026-04-08 01:27:05.987543+00"
+    },
+    {
+      "tenant_id": "00000000-0000-0000-0000-000000000001",
+      "nombre": "Demo MLM Bienestar",
+      "industria": "mlm_bienestar",
+      "modulo_activo": "mlm_bienestar",
+      "plan": "professional",
+      "dominio_custom": null,
+      "requiere_cita": false,
+      "activo": true,
+      "creado_en": "2026-04-04 01:57:25.820779+00"
+    }
+  ],
+  "hook_def": [
+    {
+      "pg_get_functiondef": "CREATE OR REPLACE FUNCTION public.custom_access_token_hook(event jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_tenant_id  uuid;\n  v_tier       text;\n  v_claims     jsonb;\nBEGIN\n  SELECT tenant_id, tier\n  INTO   v_tenant_id, v_tier\n  FROM   public.socios\n  WHERE  usuario_id = (event ->> 'user_id')::uuid;\n\n  IF v_tenant_id IS NOT NULL THEN\n    v_claims := event -> 'claims';\n    v_claims := jsonb_set(v_claims, '{tenant_id}', to_jsonb(v_tenant_id::text));\n    v_claims := jsonb_set(v_claims, '{tier}',      to_jsonb(COALESCE(v_tier, 'free')));\n    event    := jsonb_set(event,    '{claims}',    v_claims);\n  END IF;\n\n  RETURN event;\nEND;\n$function$\n"
+    }
+  ],
+  "privileges": [
+    {
+      "grantee": "supabase_auth_admin",
+      "privilege_type": "EXECUTE"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "EXECUTE"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "EXECUTE"
+    }
+  ]
+}

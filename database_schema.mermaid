@@ -1,0 +1,350 @@
+erDiagram
+
+    tenants {
+        uuid tenant_id PK
+        varchar nombre
+        varchar plan
+        varchar industria
+        varchar modulo_activo
+        varchar dominio_custom
+        boolean requiere_cita
+        boolean activo
+        timestamptz creado_en
+    }
+
+    paises {
+        uuid pais_id PK
+        varchar codigo UK
+        varchar nombre
+        varchar moneda
+        boolean activo
+        timestamptz creado_en
+    }
+
+    socios {
+        uuid usuario_id PK
+        uuid tenant_id FK
+        varchar pais_registro FK
+        varchar nombre_completo
+        varchar correo
+        varchar telefono
+        varchar foto_url
+        varchar avatar_url
+        varchar voz_url
+        text tier
+        text estado
+        timestamptz fecha_ingreso
+        timestamptz fecha_inicio_pago
+        timestamptz fecha_fin_campana
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+
+    socio_assets {
+        uuid asset_id PK
+        uuid tenant_id FK
+        uuid socio_id FK
+        text tipo
+        varchar url
+        varchar alt_text
+        integer orden
+        boolean activo
+        timestamptz creado_en
+    }
+
+    knowledge_bases {
+        uuid kb_id PK
+        uuid tenant_id FK
+        varchar condicion
+        varchar version
+        jsonb sintomas_json
+        jsonb preguntas_json
+        jsonb objeciones_json
+        jsonb lenguaje_prohibido_json
+        text protocolo_derivacion
+        boolean visible_para_socios
+        text tipo_kb
+        boolean solo_admin
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+
+    condiciones_salud {
+        uuid condicion_id PK
+        uuid tenant_id FK
+        uuid knowledge_base_id FK
+        varchar nombre
+        text descripcion
+        varchar icono_url
+        integer orden_display
+        boolean activa
+        boolean solo_admin
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+
+    campanas {
+        uuid campana_id PK
+        uuid tenant_id FK
+        uuid socio_id FK
+        uuid pais_id FK
+        uuid condicion_salud_id FK
+        uuid knowledge_base_id FK
+        varchar nombre
+        varchar tipo
+        varchar estado
+        varchar modulo_destino
+        varchar agente_tipo
+        varchar landing_url
+        boolean requiere_cita
+        timestamptz fecha_inicio
+        timestamptz fecha_fin
+        timestamptz creado_en
+    }
+
+    ingredientes {
+        uuid ingrediente_id PK
+        uuid tenant_id FK
+        varchar nombre
+        text descripcion
+        jsonb usos_json
+        jsonb estudios_json
+        text nivel_evidencia
+        boolean puede_citar
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+
+    productos {
+        uuid producto_id PK
+        uuid tenant_id FK
+        varchar nombre
+        text descripcion
+        varchar imagen_url
+        boolean activo
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+
+    producto_ingredientes {
+        uuid id PK
+        uuid producto_id FK
+        uuid ingrediente_id FK
+        numeric cantidad_mg
+        varchar rol
+        integer orden_display
+    }
+
+    productos_por_pais {
+        uuid id PK
+        uuid producto_id FK
+        uuid pais_id FK
+        varchar nombre_local
+        numeric precio_local
+        varchar moneda_local
+        varchar registro_sanitario
+        varchar ente_regulador
+        boolean disponible
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+
+    condicion_productos_por_pais {
+        uuid id PK
+        uuid condicion_id FK
+        uuid producto_id FK
+        uuid pais_id FK
+        integer prioridad
+        text razon_recomendacion
+        text lenguaje_agente
+        boolean activo
+        timestamptz creado_en
+    }
+
+    prospectos {
+        uuid prospecto_id PK
+        uuid tenant_id FK
+        uuid socio_id FK
+        uuid campana_id FK
+        uuid pais_id FK
+        uuid ultimo_pedido_id FK
+        uuid cita_id FK
+        varchar nombre
+        varchar telefono
+        varchar correo
+        varchar origen
+        varchar columna_kanban
+        varchar temperatura
+        varchar intencion
+        varchar canal_agente
+        jsonb respuestas_json
+        text transcripcion_texto
+        varchar transcripcion_voz_url
+        text nota_agente
+        text nota_socio
+        integer dias_sin_contacto
+        boolean visible_para_socio
+        boolean compartido_por_admin
+        timestamptz ultimo_contacto
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+
+    movimientos_kanban {
+        uuid movimiento_id PK
+        uuid prospecto_id FK
+        uuid socio_id FK
+        varchar columna_origen
+        varchar columna_destino
+        text nota
+        timestamptz creado_en
+    }
+
+    notificaciones {
+        uuid notif_id PK
+        uuid tenant_id FK
+        uuid socio_id FK
+        uuid prospecto_id FK
+        varchar tipo
+        varchar canal
+        text mensaje
+        boolean enviada
+        timestamptz enviada_en
+        timestamptz creado_en
+    }
+
+    pedidos {
+        uuid pedido_id PK
+        uuid tenant_id FK
+        uuid prospecto_id FK
+        uuid producto_id FK
+        uuid pais_id FK
+        uuid socio_id FK
+        numeric precio_pagado
+        varchar moneda
+        varchar numero_tracking
+        varchar courier
+        varchar estado_envio
+        text notas
+        timestamptz fecha_compra
+        timestamptz fecha_estimada_entrega
+    }
+
+    ciclos_consumo {
+        uuid ciclo_id PK
+        uuid tenant_id FK
+        uuid prospecto_id FK
+        uuid pedido_inicial_id FK
+        integer mes_actual
+        integer total_meses_completados
+        varchar estado
+        timestamptz fecha_inicio_ciclo
+        timestamptz fecha_proximo_contacto
+    }
+
+    servicios {
+        uuid servicio_id PK
+        uuid tenant_id FK
+        varchar nombre
+        text descripcion
+        integer duracion_minutos
+        numeric precio
+        varchar moneda
+        varchar color_calendario
+        boolean activo
+        timestamptz creado_en
+    }
+
+    recursos {
+        uuid recurso_id PK
+        uuid tenant_id FK
+        varchar nombre
+        varchar tipo
+        integer capacidad
+        boolean activo
+        timestamptz creado_en
+    }
+
+    disponibilidad {
+        uuid disponibilidad_id PK
+        uuid tenant_id FK
+        uuid servicio_id FK
+        uuid recurso_id FK
+        date fecha
+        time hora_inicio
+        time hora_fin
+        varchar estado
+        timestamptz creado_en
+    }
+
+    citas {
+        uuid cita_id PK
+        uuid tenant_id FK
+        uuid prospecto_id FK
+        uuid servicio_id FK
+        uuid recurso_id FK
+        uuid disponibilidad_id FK
+        date fecha
+        time hora_inicio
+        time hora_fin
+        varchar estado
+        varchar canal_origen
+        text notas_agente
+        boolean recordatorio_24h_enviado
+        boolean recordatorio_2h_enviado
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+
+    modulos_crm {
+        uuid modulo_id PK
+        uuid tenant_id FK
+        varchar modulo
+        varchar version
+        jsonb config_json
+        boolean activo
+        timestamptz instalado_en
+    }
+
+    tenants ||--o{ socios : "tiene"
+    tenants ||--o{ campanas : "tiene"
+    tenants ||--o{ knowledge_bases : "tiene"
+    tenants ||--o{ condiciones_salud : "tiene"
+    tenants ||--o{ productos : "tiene"
+    tenants ||--o{ ingredientes : "tiene"
+    tenants ||--o{ notificaciones : "tiene"
+    tenants ||--o{ servicios : "tiene"
+    tenants ||--o{ recursos : "tiene"
+    tenants ||--o{ prospectos : "tiene"
+    tenants ||--o{ pedidos : "tiene"
+    tenants ||--o{ ciclos_consumo : "tiene"
+    tenants ||--o{ modulos_crm : "tiene"
+    tenants ||--o{ socio_assets : "tiene"
+    tenants ||--o{ disponibilidad : "tiene"
+    tenants ||--o{ citas : "tiene"
+    paises ||--o{ socios : "registro en"
+    socios ||--o{ socio_assets : "tiene assets"
+    socios ||--o{ campanas : "crea"
+    campanas }o--o| condiciones_salud : "enfocada en"
+    campanas }o--o| knowledge_bases : "usa KB"
+    campanas }o--|| paises : "opera en"
+    condiciones_salud }o--o| knowledge_bases : "usa KB"
+    productos ||--o{ producto_ingredientes : "contiene"
+    ingredientes ||--o{ producto_ingredientes : "en"
+    productos ||--o{ productos_por_pais : "disponible en"
+    paises ||--o{ productos_por_pais : "con precio en"
+    condiciones_salud ||--o{ condicion_productos_por_pais : "recomienda"
+    productos ||--o{ condicion_productos_por_pais : "recomendado"
+    paises ||--o{ condicion_productos_por_pais : "en país"
+    prospectos }o--o| campanas : "entra por"
+    prospectos }o--o| socios : "asignado a"
+    prospectos ||--o{ movimientos_kanban : "tiene historial"
+    socios ||--o{ movimientos_kanban : "ejecuta"
+    prospectos ||--o{ notificaciones : "genera"
+    prospectos ||--o{ pedidos : "realiza"
+    pedidos ||--o{ ciclos_consumo : "inicia"
+    servicios ||--o{ disponibilidad : "tiene slots"
+    recursos ||--o{ disponibilidad : "asignado a"
+    prospectos ||--o{ citas : "agenda"
+    servicios ||--o{ citas : "del servicio"
+    disponibilidad ||--o{ citas : "bloquea slot"

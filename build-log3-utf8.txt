@@ -1,0 +1,65 @@
+﻿
+> saas-factory-app@0.1.0 build
+> next build
+
+node.exe : ÔÜá Warning: Next.js inferred 
+your workspace root, but it may not be 
+correct.
+En línea: 1 Carácter: 1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Users\Fabio\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified:  
+   (ÔÜá Warning: Ne...not be correct.:Strin  
+  g) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandE 
+   rror
+ 
+ We detected multiple lockfiles and selected 
+the directory of 
+C:\saasmultinicho\package-lock.json as the 
+root directory.
+ To silence this warning, set 
+`turbopack.root` in your Next.js config, or 
+consider removing one of the lockfiles if 
+it's not needed.
+   See https://nextjs.org/docs/app/api-refere
+nce/config/next-config-js/turbopack#root-dire
+ctory for more information.
+ Detected additional lockfiles: 
+   * C:\saasmultinicho\mi-nuevo-saas\package-
+lock.json
+
+Ôû▓ Next.js 16.2.2 (Turbopack)
+- Environments: .env.local
+
+ÔÜá The "middleware" file convention is 
+deprecated. Please use "proxy" instead. 
+Learn more: https://nextjs.org/docs/messages/
+middleware-to-proxy
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 3.1s
+  Running TypeScript ...
+Failed to type check.
+
+./vitest.config.ts:31:5
+Type error: No overload matches this call.
+  The last overload gave the following error.
+    Object literal may only specify known 
+properties, but 'reporter' does not exist in 
+type 'InlineConfig'. Did you mean to write 
+'reporters'?
+
+  [90m29 |[0m     testTimeout: 
+[35m30[0m_000,
+  [90m30 |[0m     [90m// Mostrar cada 
+test individualmente en el reporte[0m
+[31m[1m>[0m [90m31 |[0m     reporter: 
+[32m'verbose'[0m,
+  [90m   |[0m     [31m[1m^[0m
+  [90m32 |[0m   },
+  [90m33 |[0m   resolve: {
+  [90m34 |[0m     alias: {
+Next.js build worker exited with code: 1 and 
+signal: null

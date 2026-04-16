@@ -1,0 +1,95 @@
+﻿
+> saas-factory-app@0.1.0 build
+> next build
+
+node.exe : ÔÜá Warning: Next.js inferred 
+your workspace root, but it may not be 
+correct.
+En línea: 1 Carácter: 1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Users\Fabio\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified:  
+   (ÔÜá Warning: Ne...not be correct.:Strin  
+  g) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandE 
+   rror
+ 
+ We detected multiple lockfiles and selected 
+the directory of 
+C:\saasmultinicho\package-lock.json as the 
+root directory.
+ To silence this warning, set 
+`turbopack.root` in your Next.js config, or 
+consider removing one of the lockfiles if 
+it's not needed.
+   See https://nextjs.org/docs/app/api-refere
+nce/config/next-config-js/turbopack#root-dire
+ctory for more information.
+ Detected additional lockfiles: 
+   * C:\saasmultinicho\mi-nuevo-saas\package-
+lock.json
+
+Ôû▓ Next.js 16.2.2 (Turbopack)
+- Environments: .env.local
+
+ÔÜá The "middleware" file convention is 
+deprecated. Please use "proxy" instead. 
+Learn more: https://nextjs.org/docs/messages/
+middleware-to-proxy
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 3.0s
+  Running TypeScript ...
+Failed to type check.
+
+./src/app/api/auditoria/logs/route.ts:82:11
+Type error: No overload matches this call.
+  Overload 1 of 2, '(relation: 
+"condiciones_salud" | "knowledge_bases" | 
+"paises" | "socios" | "tenants" | "pedidos" 
+| "prospectos" | "disponibilidad" | 
+"recursos" | "servicios" | "productos" | 
+"ingredientes" | ... 9 more ... | 
+"socio_assets"): 
+PostgrestQueryBuilder<...>', gave the 
+following error.
+    Argument of type '"audit_logs"' is not 
+assignable to parameter of type 
+'"condiciones_salud" | "knowledge_bases" | 
+"paises" | "socios" | "tenants" | "pedidos" 
+| "prospectos" | "disponibilidad" | 
+"recursos" | "servicios" | "productos" | 
+"ingredientes" | ... 9 more ... | 
+"socio_assets"'.
+  Overload 2 of 2, '(relation: never): 
+PostgrestQueryBuilder<{ PostgrestVersion: 
+"14.5"; }, { Tables: { campanas: { Row: { 
+agente_tipo: string; campana_id: string; 
+condicion_salud_id: string | null; 
+creado_en: string; estado: string; ... 10 
+more ...; tipo: string; }; Insert: { ...; }; 
+Update: { ...; }; Relationships: [...]; }; 
+... 20 more ...; tenants: { ...; }; }; 
+Views: {}; Functions: { ...; }; Enums: {}; 
+CompositeTypes: {}; }, never, never, 
+never>', gave the following error.
+    Argument of type '"audit_logs"' is not 
+assignable to parameter of type 'never'.
+
+  [90m80 |[0m   [90m// 5. Construir query 
+con filtros opcionales[0m
+  [90m81 |[0m   [36mlet[0m query = 
+supabase
+[31m[1m>[0m [90m82 |[0m     
+.[36mfrom[0m([32m'audit_logs'[0m)
+  [90m   |[0m           [31m[1m^[0m
+  [90m83 |[0m     .select([32m'*'[0m, { 
+count: [32m'exact'[0m })
+  [90m84 |[0m     
+.eq([32m'tenant_id'[0m, tenantId)
+  [90m85 |[0m     
+.order([32m'timestamp'[0m, { ascending: 
+[36mfalse[0m })
+Next.js build worker exited with code: 1 and 
+signal: null
