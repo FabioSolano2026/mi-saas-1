@@ -15,9 +15,8 @@ const useOpenRouter = !!process.env.OPENROUTER_API_KEY
 
 const _provider = useOpenRouter
   ? createOpenAI({
-      baseURL:       'https://openrouter.ai/api/v1',
-      apiKey:        process.env.OPENROUTER_API_KEY!,
-      compatibility: 'compatible',
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey:  process.env.OPENROUTER_API_KEY!,
     })
   : createOpenAI({
       apiKey: process.env.OPENAI_API_KEY!,

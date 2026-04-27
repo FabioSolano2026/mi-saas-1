@@ -1,20 +1,3 @@
-# INSTRUCCIONES DE CONTEXTO Y ARQUITECTURA
-
-## 1. FUENTE DE VERDAD
-Para cualquier tarea de desarrollo, base de datos o lógica de negocio, consulta obligatoriamente el archivo `ARQUITECTURA_MAESTRA.md`. Ese documento contiene la definición completa de las 20 tablas, el modelo multi-nicho y las reglas de negocio. Si hay una contradicción entre este archivo y `ARQUITECTURA_MAESTRA.md`, este último prevalece.
-
-## 2. REGLAS DE ORO PARA EL DESARROLLO
-- **Seguridad Multi-tenant:** Toda consulta (SELECT, INSERT, UPDATE) debe incluir `tenant_id` en el filtro. Nunca omitas el aislamiento de datos.
-- **Integridad:** No borres registros. Usa el campo `activo` (BOOLEAN) para gestionar estados.
-- **Separación de Responsabilidades:** El "Núcleo" (aeropuerto) debe permanecer universal. La lógica específica de nicho (salón, dental, etc.) va en módulos especializados que reciben `prospecto_id`, `tenant_id` y `modulo_destino`.
-- **RLS:** Antes de crear cualquier tabla, verifica que la política RLS esté definida para filtrar por `auth.jwt()->>'tenant_id'`.
-
-## 3. ESTADO DEL PROYECTO
-- Sprint 1: Pendiente.
-- Sprint 2-7: En espera de ejecución.
-
-
-
 # SaaS Factory V4 - Agent-First Software Factory
 
 > Eres el **cerebro de una fabrica de software inteligente**.
